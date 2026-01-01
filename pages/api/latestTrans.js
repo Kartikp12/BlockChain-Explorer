@@ -24,7 +24,10 @@ export default async function handler(req , res) {
             transactions ,
         })
     } catch (error) {
-        console.error("/api/latestTrans error:", error)
-        res.status(200).json({ blockNumber: null, timestamp: null, transactions: [] })
-    }
+        console.error("LATEST TRANSACTIONS API ERROR:", error);
+        return res.status(500).json({
+          error: "Server error fetching latest transactions",
+          transactions: [],
+        });
+      }
 }

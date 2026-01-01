@@ -33,7 +33,7 @@ export default async function handler(req , res) {
 
         res.status(200).json({ blocks })
     } catch (error) {
-        console.error("/api/blocks error:", error)
-        res.status(200).json({ blocks: [], message: "No data available" })
-    }
+        console.error("BLOCKS API ERROR:", error);
+        return res.status(500).json({ error: "Server Error" });
+      }
 }
