@@ -39,15 +39,26 @@ export default function TransactionsPage() {
   const [transactions, setTransactions] = useState([])
   const [loaded, setLoaded] = useState(false)
 
-  useEffect(() => {
+  // Show More / Show Less state
+  const [showAll, setShowAll] = useState(false)
 
+  // Number of transactions shown initially
+  const INITIAL_TRANSACTION_COUNT = 7
+
+  useEffect(() => {
 
     const fetchTransactions = async () => {
       if (!blockNumber) return
+
       try {
         const res = await fetch(`/api/transactions?blockNumber=${blockNumber}`)
         const data = await res.json()
-        setTransactions(Array.isArray(data.transactions) ? data.transactions : [])
+
+        setTransactions(
+          Array.isArray(data.transactions)
+            ? data.transactions
+            : []
+        )
       } catch (e) {
         setTransactions([])
       } finally {
@@ -58,14 +69,21 @@ export default function TransactionsPage() {
     fetchTransactions()
   }, [blockNumber])
 
+  // Transactions to display
+  const displayedTransactions = showAll
+    ? transactions
+    : transactions.slice(0, INITIAL_TRANSACTION_COUNT)
+
   return (
     <div className="w-full max-w-7xl mx-auto">
+
       <div className="mb-4 sm:mb-6 flex items-center gap-3 sm:gap-4">
         <button 
           onClick={() => router.back()}
           className="bg-gradient-to-r from-gray-700 to-gray-800 hover:from-gray-600 hover:to-gray-700 text-white font-semibold px-4 sm:px-6 py-2 rounded-lg transition-all duration-200 shadow-lg flex items-center gap-2 text-sm sm:text-base"
         >
-          <span>🔙</span> <span className="hidden sm:inline">Go Back</span>
+          <span>🔙</span>
+          <span className="hidden sm:inline">Go Back</span>
         </button>
       </div>
 
@@ -78,6 +96,7 @@ export default function TransactionsPage() {
           backdropFilter: 'blur(16px)'
         }}
       >
+
         <div className="mb-4 sm:mb-6">
           <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white mb-2">
             Block: <span className="text-cyan-400">#{blockNumber}</span>
@@ -88,51 +107,118 @@ export default function TransactionsPage() {
           <div className="flex items-center justify-center py-8 sm:py-12">
             <div className="flex flex-col items-center gap-3">
               <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-t-2 border-b-2 border-cyan-400"></div>
-              <p className="text-gray-300 text-sm sm:text-base">Loading transactions...</p>
+
+              <p className="text-gray-300 text-sm sm:text-base">
+                Loading transactions...
+              </p>
             </div>
           </div>
         )}
+
         {loaded && transactions.length === 0 && (
           <div className="text-center py-8 sm:py-12">
-            <p className="text-gray-300 text-base sm:text-lg">No transactions found.</p>
+            <p className="text-gray-300 text-base sm:text-lg">
+              No transactions found.
+            </p>
           </div>
         )}
 
         {loaded && transactions.length > 0 && (
-          <div className="space-y-3 sm:space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar pr-1 sm:pr-2">
-            {transactions.map((tx) => (
-              <div 
-                key={tx.hash}
-                className="bg-gradient-to-br from-slate-800/40 to-purple-900/20 rounded-xl p-4 sm:p-5 md:p-6 border border-purple-500/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20"
-              >
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                  <div className="space-y-2 sm:space-y-3">
-                    <div>
-                      <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">Hash</p>
-                      <p className="text-white font-mono text-xs sm:text-sm break-all" title={tx.hash}>{tx.hash}</p>
+          <>
+            {/* Transactions */}
+            <div className="space-y-3 sm:space-y-4 max-h-[calc(100vh-300px)] overflow-y-auto custom-scrollbar pr-1 sm:pr-2">
+
+              {displayedTransactions.map((tx) => (
+                <div 
+                  key={tx.hash}
+                  className="bg-gradient-to-br from-slate-800/40 to-purple-900/20 rounded-xl p-4 sm:p-5 md:p-6 border border-purple-500/20 hover:border-cyan-400/50 transition-all duration-300 hover:shadow-lg hover:shadow-cyan-500/20"
+                >
+
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+
+                    <div className="space-y-2 sm:space-y-3">
+
+                      <div>
+                        <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">
+                          Hash
+                        </p>
+
+                        <p
+                          className="text-white font-mono text-xs sm:text-sm break-all"
+                          title={tx.hash}
+                        >
+                          {tx.hash}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">
+                          From
+                        </p>
+
+                        <p
+                          className="text-gray-300 font-mono text-xs sm:text-sm break-all"
+                          title={tx.from}
+                        >
+                          {tx.from}
+                        </p>
+                      </div>
+
                     </div>
-                    <div>
-                      <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">From</p>
-                      <p className="text-gray-300 font-mono text-xs sm:text-sm break-all" title={tx.from}>{tx.from}</p>
+
+                    <div className="space-y-2 sm:space-y-3">
+
+                      <div>
+                        <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">
+                          To
+                        </p>
+
+                        <p
+                          className="text-gray-300 font-mono text-xs sm:text-sm break-all"
+                          title={tx.to || "Contract Creation"}
+                        >
+                          {tx.to || "Contract Creation"}
+                        </p>
+                      </div>
+
+                      <div>
+                        <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">
+                          Value
+                        </p>
+
+                        <p className="text-green-400 font-bold text-base sm:text-lg">
+                          {formatEth(tx.value)}
+                        </p>
+                      </div>
+
                     </div>
+
                   </div>
-                  <div className="space-y-2 sm:space-y-3">
-                    <div>
-                      <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">To</p>
-                      <p className="text-gray-300 font-mono text-xs sm:text-sm break-all" title={tx.to || "Contract Creation"}>
-                        {tx.to || "Contract Creation"}
-                      </p>
-                    </div>
-                    <div>
-                      <p className="text-gray-400 text-[10px] sm:text-xs uppercase tracking-wide mb-1">Value</p>
-                      <p className="text-green-400 font-bold text-base sm:text-lg">{formatEth(tx.value)}</p>
-                    </div>
-                  </div>
+
                 </div>
+              ))}
+
+            </div>
+
+            {/* Show More / Show Less */}
+            {transactions.length > INITIAL_TRANSACTION_COUNT && (
+              <div className="flex justify-center mt-5 sm:mt-6">
+
+                <button
+                  onClick={() => setShowAll((prev) => !prev)}
+                  className="px-5 py-2.5 rounded-lg bg-cyan-500/10 border border-cyan-400/30 text-cyan-400 hover:bg-cyan-400 hover:text-white transition-all duration-200 text-sm font-semibold"
+                >
+                  {showAll
+                    ? "Show Less"
+                    : `Show More (${transactions.length - INITIAL_TRANSACTION_COUNT})`
+                  }
+                </button>
+
               </div>
-            ))}
-          </div>
+            )}
+          </>
         )}
+
       </div>
     </div>
   )
