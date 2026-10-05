@@ -109,7 +109,11 @@ const NavBar = () => {
 
 
           {/* ETH Price */}
-          <div className="flex items-center gap-2 bg-white/5 backdrop-blur-md rounded-xl px-3 sm:px-4 py-2 border border-white/10 shadow-lg w-full sm:w-auto justify-center sm:justify-start">
+          <div 
+            onClick={() => window.open("https://etherscan.io/chart/etherprice", "_blank")}
+            className="flex items-center gap-2 bg-white/5 backdrop-blur-md rounded-xl px-3 sm:px-4 py-2 border border-white/10 shadow-lg w-full sm:w-auto justify-center sm:justify-start cursor-pointer hover:bg-white/10 transition-all duration-200"
+            title="View Ethereum price chart on Etherscan"
+          >
 
             <FaEthereum className="text-lg sm:text-xl text-cyan-400 flex-shrink-0" />
 
